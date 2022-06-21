@@ -1,0 +1,19 @@
+{
+    "name": "palmyr/console",
+    "description": "Base symfony console",
+    "type": "library",
+    "license": "GPL-3.0-only",
+    "authors": [
+        { "name": "Ryan Palm", "email":  "rspalm@bigpond.com" }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Palmyr\\Console\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=8.1",
+        "symfony/console": "^6.1"
+    }
+}
