@@ -14,6 +14,10 @@ abstract class Application extends BaseApplication
 
     private string $consoleDirectory;
 
+    protected ContainerBuilder $container;
+
+    protected FileLocator $fileLocator;
+
     protected function __construct(string $name = 'app', string $version = '1.0.0')
     {
         parent::__construct($name, $version);
@@ -24,14 +28,17 @@ abstract class Application extends BaseApplication
         $application = new static();
 
         $application->container = $containerBuilder = new ContainerBuilder();
+        $application->fileLocator = $fileLocator = new FileLocator();
 
         $containerBuilder->set('container', $containerBuilder);
         $containerBuilder->set('application', $application);
+        $containerBuilder->set('file_locator', $fileLocator);
         $containerBuilder->setParameter('project_directory', $application->getprojectDirectory());
         $containerBuilder->setParameter('console_directory', $application->getConsoleDirectory());
 
         $application->boot(
-            new YamlFileLoader($containerBuilder, new FileLocator())
+            $containerBuilder,
+            new YamlFileLoader($containerBuilder, $fileLocator)
         );
 
         $containerBuilder->compile(true);
@@ -68,7 +75,7 @@ abstract class Application extends BaseApplication
         return $this->consoleDirectory;
     }
 
-    protected function boot(YamlFileLoader $loader): void
+    protected function boot(ContainerBuilder $container, YamlFileLoader $loader): void
     {
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
