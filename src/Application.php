@@ -2,8 +2,10 @@
 
 namespace Palmyr\Console;
 
+use Palmyr\Console\DependencyInjection\CompilerPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application AS BaseApplication;
+use Symfony\Component\DependencyInjection\Compiler\AutowirePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
@@ -77,6 +79,8 @@ abstract class Application extends BaseApplication
 
     protected function boot(ContainerBuilder $container, YamlFileLoader $loader): void
     {
+        $container->addCompilerPass(New AutowirePass());
+        $container->addCompilerPass(new CompilerPass());
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
     }
