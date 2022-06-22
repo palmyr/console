@@ -15,11 +15,14 @@ class CompilerPass implements CompilerPassInterface
 
         $commands = $container->findTaggedServiceIds("command");
 
+        $commandIds = [];
         foreach ($commands as $id => $tags) {
-            /** @var Command $command */
-            $command = $container->get($id);
-            $application->add($command);
+            $definition = $container->getDefinition($id);
+            $definition->setPublic(true);
+            $commandIds[] = $id;
         }
+
+        $container->setParameter('command.ids', $commandIds);
     }
 
 }
