@@ -7,8 +7,8 @@ services:
   Symfony\Component\PropertyAccess\PropertyAccessorInterface:
     class: Symfony\Component\PropertyAccess\PropertyAccessor
 
-  stream_handler:
-    class: Monolog\Handler\StreamHandler
+  log_handler:
+    class: Symfony\Bridge\Monolog\Handler\ConsoleHandler
     arguments:
       - "php://stdout"
 
@@ -17,7 +17,7 @@ services:
     class: Monolog\Logger
     arguments:
       - "log"
-      - ["@stream_handler"]
+      - ["@log_handler"]
 
   logger:
     alias: Psr\Log\LoggerInterface
