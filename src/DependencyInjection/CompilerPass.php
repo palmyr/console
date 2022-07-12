@@ -11,7 +11,6 @@ class CompilerPass implements CompilerPassInterface
 
     public function process(ContainerBuilder $container)
     {
-        $application = $container->get('application');
 
         $commands = $container->findTaggedServiceIds("command");
 

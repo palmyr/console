@@ -6,3 +6,18 @@ services:
 
   Symfony\Component\PropertyAccess\PropertyAccessorInterface:
     class: Symfony\Component\PropertyAccess\PropertyAccessor
+
+  stream_handler:
+    class: Monolog\Handler\StreamHandler
+    arguments:
+      - "php://stdout"
+
+  Psr\Log\LoggerInterface:
+    autowire: false
+    class: Monolog\Logger
+    arguments:
+      - "log"
+      - ["@stream_handler"]
+
+  logger:
+    alias: Psr\Log\LoggerInterface
