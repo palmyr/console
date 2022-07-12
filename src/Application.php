@@ -11,6 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\AutowirePass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 
 abstract class Application extends BaseApplication
 {
@@ -85,12 +86,16 @@ abstract class Application extends BaseApplication
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
         $container->addCompilerPass(New AutowirePass());
         $container->addCompilerPass(new CompilerPass());
+        $container->addCompilerPass(new RegisterListenersPass());
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
     }
 
     public function doRun(InputInterface $input, OutputInterface $output)
     {
+
+        $this->setDispatcher($this->container->get("event_dispatcher"));
+
         $commands = $this->container->getParameter('command.ids');
 
         foreach ($commands as $id) {
