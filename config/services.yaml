@@ -9,8 +9,6 @@ services:
 
   log_handler:
     class: Symfony\Bridge\Monolog\Handler\ConsoleHandler
-    arguments:
-      - "php://stdout"
 
   Psr\Log\LoggerInterface:
     autowire: false
