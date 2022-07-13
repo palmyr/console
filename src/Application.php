@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 abstract class Application extends BaseApplication
 {
@@ -85,6 +86,7 @@ abstract class Application extends BaseApplication
     protected function boot(ContainerBuilder $container, YamlFileLoader $loader): void
     {
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
+        $container->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
         $container->addCompilerPass(new CompilerPass());
         $container->addCompilerPass(new RegisterListenersPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
