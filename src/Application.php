@@ -9,6 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\AutowirePass;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
@@ -85,8 +86,7 @@ abstract class Application extends BaseApplication
     {
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
         $container->addCompilerPass(new CompilerPass());
-        $container->addCompilerPass(New AutowirePass());
-        $container->addCompilerPass(new RegisterListenersPass());
+        $container->addCompilerPass(new RegisterListenersPass(), PassConfig::TYPE_BEFORE_REMOVING);
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
     }
