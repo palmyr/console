@@ -84,8 +84,8 @@ abstract class Application extends BaseApplication
     protected function boot(ContainerBuilder $container, YamlFileLoader $loader): void
     {
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
-        $container->addCompilerPass(New AutowirePass());
         $container->addCompilerPass(new CompilerPass());
+        $container->addCompilerPass(New AutowirePass());
         $container->addCompilerPass(new RegisterListenersPass());
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
