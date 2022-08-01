@@ -24,3 +24,5 @@ services:
   event_dispatcher:
     class: Symfony\Component\EventDispatcher\EventDispatcher
     public: true
+
+  Symfony\Component\Filesystem\Filesystem: {}
