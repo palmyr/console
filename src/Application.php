@@ -9,10 +9,14 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
+use Symfony\Component\DependencyInjection\Compiler\RegisterServiceSubscribersPass;
+use Symfony\Component\DependencyInjection\Compiler\ResolveServiceSubscribersPass;
+use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Contracts\Service\ServiceSubscriberInterface;
 
 abstract class Application extends BaseApplication
 {
@@ -86,8 +90,14 @@ abstract class Application extends BaseApplication
     {
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
         $container->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
-        $container->addCompilerPass(new CompilerPass());
-        $container->addCompilerPass(new RegisterListenersPass(), PassConfig::TYPE_BEFORE_REMOVING);
+        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_locator');
+
+        foreach ($this->getCompilerPasses() as $type => $compilerPasses ) {
+            foreach ( $compilerPasses as $compilerPass ) {
+                $container->addCompilerPass($compilerPass, $type);
+            }
+        }
+
         $loader->load($this->getProjectDirectory() . '/config/services.yaml');
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
     }
@@ -106,6 +116,23 @@ abstract class Application extends BaseApplication
         }
 
         return parent::doRun($input, $output);
+    }
+
+    protected function getCompilerPasses(): array
+    {
+        return [
+            PassConfig::TYPE_OPTIMIZE => [
+                new CompilerPass(),
+                new RegisterServiceSubscribersPass(),
+                new ResolveServiceSubscribersPass(),
+            ],
+            PassConfig::TYPE_BEFORE_OPTIMIZATION => [],
+            PassConfig::TYPE_BEFORE_REMOVING => [
+                new RegisterListenersPass(),
+            ],
+            PassConfig::TYPE_REMOVE => [],
+            PassConfig::TYPE_AFTER_REMOVING => [],
+        ];
     }
 
 }
