@@ -90,7 +90,7 @@ abstract class Application extends BaseApplication
     {
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
         $container->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
-        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_locator');
+        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_subscriber');
 
         foreach ($this->getCompilerPasses() as $type => $compilerPasses ) {
             foreach ( $compilerPasses as $compilerPass ) {
