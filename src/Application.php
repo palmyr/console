@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\Compiler\ResolveServiceSubscribersPass
 use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\ErrorHandler\Debug;
 use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Contracts\Service\ServiceSubscriberInterface;
@@ -37,6 +38,7 @@ abstract class Application extends BaseApplication
     final static public function init(): void
     {
         $application = new static();
+        Debug::enable();
 
         $application->container = $containerBuilder = new ContainerBuilder();
         $application->fileLocator = $fileLocator = new FileLocator();
