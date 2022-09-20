@@ -2,7 +2,8 @@
 
 namespace Palmyr\Console;
 
-use Palmyr\Console\DependencyInjection\CompilerPass;
+use Palmyr\Console\DependencyInjection\CommandCompilerPass;
+use Palmyr\SymfonyCommonUtils\DependencyInjection\SymfonyCommonUtilsExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application AS BaseApplication;
 use Symfony\Component\Console\Command\Command;
@@ -59,6 +60,22 @@ abstract class Application extends BaseApplication
         $application->run();
     }
 
+    public function doRun(InputInterface $input, OutputInterface $output)
+    {
+
+        $this->setDispatcher($this->container->get("event_dispatcher"));
+
+        $commands = $this->container->getParameter('command.ids');
+
+        foreach ($commands as $id) {
+            /** @var Command $command */
+            $command = $this->container->get($id);
+            $this->add($command);
+        }
+
+        return parent::doRun($input, $output);
+    }
+
     protected function getProjectDirectory(): string
     {
         if ( !isset($this->projectDirectory) ) {
@@ -80,7 +97,7 @@ abstract class Application extends BaseApplication
         return $this->projectDirectory;
     }
 
-    private function getConsoleDirectory(): string
+    protected function getConsoleDirectory(): string
     {
         if ( !isset($this->consoleDirectory) ) {
             $this->consoleDirectory = dirname(__DIR__);
@@ -93,6 +110,7 @@ abstract class Application extends BaseApplication
         $container->registerForAutoconfiguration(Command::class)->addTag('command');
         $container->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
         $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_subscriber');
+        $container->registerExtension(new SymfonyCommonUtilsExtension());
 
         foreach ($this->getCompilerPasses() as $type => $compilerPasses ) {
             foreach ( $compilerPasses as $compilerPass ) {
@@ -104,27 +122,11 @@ abstract class Application extends BaseApplication
         $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
     }
 
-    public function doRun(InputInterface $input, OutputInterface $output)
-    {
-
-        $this->setDispatcher($this->container->get("event_dispatcher"));
-
-        $commands = $this->container->getParameter('command.ids');
-
-        foreach ($commands as $id) {
-            /** @var Command $command */
-            $command = $this->container->get($id);
-            $this->add($command);
-        }
-
-        return parent::doRun($input, $output);
-    }
-
     protected function getCompilerPasses(): array
     {
         return [
             PassConfig::TYPE_OPTIMIZE => [
-                new CompilerPass(),
+                new CommandCompilerPass(),
                 new RegisterServiceSubscribersPass(),
                 new ResolveServiceSubscribersPass(),
             ],
