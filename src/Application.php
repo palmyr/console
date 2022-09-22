@@ -3,6 +3,7 @@
 namespace Palmyr\Console;
 
 use Palmyr\Console\DependencyInjection\CommandCompilerPass;
+use Palmyr\Console\DependencyInjection\ConsoleExtension;
 use Palmyr\SymfonyCommonUtils\DependencyInjection\SymfonyCommonUtilsExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application AS BaseApplication;
@@ -41,22 +42,7 @@ abstract class Application extends BaseApplication
         $application = new static();
         Debug::enable();
 
-        $application->container = $containerBuilder = new ContainerBuilder();
-        $application->fileLocator = $fileLocator = new FileLocator();
-
-        $containerBuilder->set('container', $containerBuilder);
-        $containerBuilder->set('application', $application);
-        $containerBuilder->set('file_locator', $fileLocator);
-        $containerBuilder->setParameter('project_directory', $application->getprojectDirectory());
-        $containerBuilder->setParameter('console_directory', $application->getConsoleDirectory());
-
-        $application->boot(
-            $containerBuilder,
-            new YamlFileLoader($containerBuilder, $fileLocator)
-        );
-
-        $containerBuilder->compile(true);
-
+        $application->boot();
         $application->run();
     }
 
@@ -97,29 +83,36 @@ abstract class Application extends BaseApplication
         return $this->projectDirectory;
     }
 
-    protected function getConsoleDirectory(): string
+    private function boot(): void
     {
-        if ( !isset($this->consoleDirectory) ) {
-            $this->consoleDirectory = dirname(__DIR__);
-        }
-        return $this->consoleDirectory;
-    }
 
-    protected function boot(ContainerBuilder $container, YamlFileLoader $loader): void
-    {
-        $container->registerForAutoconfiguration(Command::class)->addTag('command');
-        $container->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
-        $container->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_subscriber');
-        $container->registerExtension(new SymfonyCommonUtilsExtension());
+        $this->container = $containerBuilder = new ContainerBuilder();
+        $this->fileLocator = $fileLocator = new FileLocator();
+
+        $containerBuilder->set('container', $containerBuilder);
+        $containerBuilder->set('application', $this);
+        $containerBuilder->set('file_locator', $fileLocator);
+
+        $containerBuilder->setParameter('application_directory', $this->getprojectDirectory());
+
+        $containerBuilder->registerForAutoconfiguration(Command::class)->addTag('command');
+        $containerBuilder->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
+        $containerBuilder->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_subscriber');
+
+        $this->loadExtras($containerBuilder);
 
         foreach ($this->getCompilerPasses() as $type => $compilerPasses ) {
             foreach ( $compilerPasses as $compilerPass ) {
-                $container->addCompilerPass($compilerPass, $type);
+                $containerBuilder->addCompilerPass($compilerPass, $type);
             }
         }
 
-        $loader->load($this->getProjectDirectory() . '/config/services.yaml');
-        $loader->load($this->getConsoleDirectory() . '/config/services.yaml');
+        foreach ( $this->getExtensions() as $extension ) {
+            $containerBuilder->registerExtension($extension);
+            $containerBuilder->loadFromExtension($extension->getAlias());
+        }
+
+        $containerBuilder->compile(true);
     }
 
     protected function getCompilerPasses(): array
@@ -137,6 +130,19 @@ abstract class Application extends BaseApplication
             PassConfig::TYPE_REMOVE => [],
             PassConfig::TYPE_AFTER_REMOVING => [],
         ];
+    }
+
+    protected function getExtensions(): array
+    {
+        return [
+            new ConsoleExtension(),
+            new SymfonyCommonUtilsExtension(),
+        ];
+    }
+
+    protected function loadExtras(ContainerBuilder $containerBuilder): void
+    {
+
     }
 
 }

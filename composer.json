@@ -23,6 +23,6 @@
         "symfony/property-access": "^6.1",
         "symfony/event-dispatcher": "^5.0|^6.0",
         "symfony/error-handler": "^6.1",
-        "palmyr/symfony-commonutils": "dev-master"
+        "palmyr/symfony-commonutils": "^1.0"
     }
 }
