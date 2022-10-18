@@ -87,7 +87,7 @@ abstract class Application extends BaseApplication
     {
 
         $this->container = $containerBuilder = new ContainerBuilder();
-        $this->fileLocator = $fileLocator = new FileLocator();
+        $this->fileLocator = $fileLocator = new FileLocator($this->getProjectDirectory());
 
         $containerBuilder->set('container', $containerBuilder);
         $containerBuilder->set('application', $this);
@@ -142,7 +142,9 @@ abstract class Application extends BaseApplication
 
     protected function loadExtras(ContainerBuilder $containerBuilder): void
     {
+        $loader = new YamlFileLoader($containerBuilder, $this->fileLocator);
 
+        $loader->load("config/services.yaml");
     }
 
 }
