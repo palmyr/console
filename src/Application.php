@@ -95,11 +95,9 @@ abstract class Application extends BaseApplication
 
         $containerBuilder->setParameter('application_directory', $this->getprojectDirectory());
 
-        $containerBuilder->registerForAutoconfiguration(Command::class)->addTag('command');
+        $containerBuilder->registerForAutoconfiguration(Command::class)->addTag('console.command');
         $containerBuilder->registerForAutoconfiguration(EventSubscriberInterface::class)->addTag('kernel.event_subscriber');
         $containerBuilder->registerForAutoconfiguration(ServiceSubscriberInterface::class)->addTag('container.service_subscriber');
-
-        $this->loadExtras($containerBuilder);
 
         foreach ($this->getCompilerPasses() as $type => $compilerPasses ) {
             foreach ( $compilerPasses as $compilerPass ) {
@@ -111,6 +109,8 @@ abstract class Application extends BaseApplication
             $containerBuilder->registerExtension($extension);
             $containerBuilder->loadFromExtension($extension->getAlias());
         }
+
+        $this->loadExtras($containerBuilder);
 
         $containerBuilder->compile(true);
     }

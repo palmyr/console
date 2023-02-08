@@ -12,7 +12,7 @@ class CommandCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
 
-        $commands = $container->findTaggedServiceIds("command");
+        $commands = $container->findTaggedServiceIds("console.command");
 
         $commandIds = [];
         foreach ($commands as $id => $tags) {
