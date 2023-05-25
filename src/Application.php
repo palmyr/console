@@ -9,6 +9,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application AS BaseApplication;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\RegisterServiceSubscribersPass;
@@ -32,14 +33,16 @@ abstract class Application extends BaseApplication
 
     protected FileLocator $fileLocator;
 
-    protected function __construct(string $name = 'app', string $version = '1.1.1')
+    protected function __construct(string $env, string $name = 'app', string $version = '1.1.1')
     {
         parent::__construct($name, $version);
+        $inputDefinition = $this->getDefinition();
+        $inputDefinition->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $env));
     }
 
-    final static public function init(): void
+    final static public function init(string $env): void
     {
-        $application = new static();
+        $application = new static($env);
         Debug::enable();
 
         $application->boot();

@@ -4,3 +4,5 @@
 /demo.php
 /demo.yaml
 /config
+/.env
+/.env.*
