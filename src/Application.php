@@ -50,9 +50,9 @@ abstract class Application extends BaseApplication
             $_SERVER["APP_ENV"] = $env;
         }
 
-        (new \Symfony\Component\Dotenv\Dotenv())->bootEnv(path: $projectDirectory . DIRECTORY_SEPARATOR . ".env", defaultEnv: $env);
+        (new \Symfony\Component\Dotenv\Dotenv())->bootEnv(path: $projectDirectory . DIRECTORY_SEPARATOR . ".env");
 
-        $application = new static($env);
+        $application = new static($_SERVER["APP_ENV"]);
         Debug::enable();
 
         $application->boot();

@@ -3,5 +3,4 @@
 /composer.lock
 /bin/
 /config
-/.env
 /.env.*
