@@ -1,8 +1,7 @@
 /vendor/
 /.idea/
 /composer.lock
-/demo.php
-/demo.yaml
+/bin/
 /config
 /.env
 /.env.*

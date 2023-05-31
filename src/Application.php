@@ -8,13 +8,13 @@ use Palmyr\SymfonyCommonUtils\DependencyInjection\SymfonyCommonUtilsExtension;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Application AS BaseApplication;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\Compiler\RegisterServiceSubscribersPass;
 use Symfony\Component\DependencyInjection\Compiler\ResolveServiceSubscribersPass;
-use Symfony\Component\DependencyInjection\Compiler\ServiceLocatorTagPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\ErrorHandler\Debug;
@@ -40,13 +40,23 @@ abstract class Application extends BaseApplication
         $inputDefinition->addOption(new InputOption('--env', '-e', InputOption::VALUE_REQUIRED, 'The Environment name.', $env));
     }
 
-    final static public function init(string $env): void
+    final static public function init(string $projectDirectory): void
     {
+
+        $input = new ArgvInput();
+
+        if (null !== $env = $input->getParameterOption(['--env', '-e'], null, true)) {
+            putenv("APP_ENV".'='.$env);
+            $_SERVER["APP_ENV"] = $env;
+        }
+
+        (new \Symfony\Component\Dotenv\Dotenv())->bootEnv(path: $projectDirectory . DIRECTORY_SEPARATOR . ".env", defaultEnv: $env);
+
         $application = new static($env);
         Debug::enable();
 
         $application->boot();
-        $application->run();
+        $application->run(input: $input);
     }
 
     public function doRun(InputInterface $input, OutputInterface $output)
