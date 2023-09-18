@@ -18,6 +18,14 @@ services:
       - "log"
       - ["@log_handler"]
 
+  Symfony\Component\HttpKernel\EventListener\DebugHandlersListener:
+    class: Symfony\Component\HttpKernel\EventListener\DebugHandlersListener
+    arguments:
+      - null
+      - '@Psr\Log\LoggerInterface'
+    tags:
+      - "kernel.event_subscriber"
+
   logger:
     alias: Psr\Log\LoggerInterface
 
