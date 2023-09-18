@@ -2,6 +2,7 @@
 
 namespace Palmyr\Console;
 
+use Monolog\Logger;
 use Palmyr\Console\DependencyInjection\CommandCompilerPass;
 use Palmyr\Console\DependencyInjection\ConsoleExtension;
 use Palmyr\SymfonyCommonUtils\DependencyInjection\SymfonyCommonUtilsExtension;
@@ -53,7 +54,6 @@ abstract class Application extends BaseApplication
         (new \Symfony\Component\Dotenv\Dotenv())->bootEnv(path: $projectDirectory . DIRECTORY_SEPARATOR . ".env");
 
         $application = new static($_SERVER["APP_ENV"]);
-        Debug::enable();
 
         $application->boot();
         $application->run(input: $input);
@@ -99,12 +99,15 @@ abstract class Application extends BaseApplication
     private function boot(): void
     {
 
+        $errorHandler = Debug::enable();
+
         $this->container = $containerBuilder = new ContainerBuilder();
         $this->fileLocator = $fileLocator = new FileLocator($this->getProjectDirectory());
 
         $containerBuilder->set('container', $containerBuilder);
         $containerBuilder->set('application', $this);
         $containerBuilder->set('file_locator', $fileLocator);
+        $containerBuilder->set('error_handler', $errorHandler);
 
         $containerBuilder->setParameter('application_directory', $this->getprojectDirectory());
 
